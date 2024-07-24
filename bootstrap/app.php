@@ -3,6 +3,9 @@
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use App\Http\Middleware\Authenticate;
+ 
+
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -16,3 +19,6 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withExceptions(function (Exceptions $exceptions) {
         //
     })->create();
+    /* ->withMiddleware(function (Middleware $middleware) {
+        $middleware->append(Authenticate::class);
+   }); */
