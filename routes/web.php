@@ -52,3 +52,15 @@ Route::get('/login', [UserController::class, 'login'])->name('login')->middlewar
 
 // Log In User
 Route::post('/users/authenticate', [UserController::class, 'authenticate']);
+
+//Activate listing
+Route::get('/listings/{id}/activate', [ListingController::class, 'activate'])->name('listings.activate');
+
+//Deactivate listing
+Route::get('/listings/{id}/deactivate', [ListingController::class, 'deactivate'])->name('listings.deactivate');
+
+//Show Apply form
+Route::get('/listings/{id}/apply', [ListingController::class, 'apply']);
+
+//Store Listing data
+Route::post('/listings/{id}/save', [ListingController::class, 'save']);

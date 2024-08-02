@@ -5,19 +5,31 @@ use App\Models\User;
 use App\Models\Listing;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Models\JobApplication;
 use Illuminate\Validation\Rule; 
 
 class ListingController extends Controller
 {
     //get and show all listings
-    public function index() {
+    /* public function index() {
 
         return view('listings.index' ,[
             'listings' => Listing::latest()->filter(request(['tag','search']))->paginate(6)
         ]);
+    } */
+
+    public function index() {
+        return view('listings.index', [
+            'listings' => Listing::latest()
+                ->where('status', true)
+                ->filter(request(['tag', 'search']))
+                ->paginate(6)
+        ]);
     }
+    
     // show single listing
     public function show(Listing $listing) {
+       // print_r($listing->id);
         return view('listings.show', [
             'listing' => $listing
     ]);
@@ -100,4 +112,54 @@ class ListingController extends Controller
         /* return view('listings.manage', ['listings' => auth()->user()->listings()->get()]); */
         return view('listings.manage', ['listings' => auth()->user()->listings]);
     }
+
+    public function activate($id)
+    {
+        $listing = Listing::find($id);
+        $listing->status = true;
+        $listing->save();
+
+        return redirect('/')->with('message', 'Listing activated successfully.');
+    }
+
+    public function deactivate($id)
+    {
+        $listing = Listing::find($id);
+        $listing->status = false;
+        $listing->save();
+
+        return redirect('/')->with('message', 'Listing deactivated successfully.');
+    }
+
+    public function apply(Listing $listing) {
+        //print_r($listing->id);
+        return view('listings.form', [
+            'listing' => $listing
+    ]);
+    }
+
+    public function save(Request $request, $id)
+{
+    $request->validate([
+        'name' => 'required|string|max:255',
+        'email' => 'required|email|max:255',
+        'resume' => 'required|file|mimes:pdf,doc,docx|max:2048',
+    ]);
+
+    $listing = Listing::findOrFail($id);
+
+    // Store the uploaded resume
+    $resumePath = $request->file('resume')->store('resumes', 'public');
+
+    // Create a new job application record
+    $application = new JobApplication();
+    $application->listing_id = $listing->id;
+    $application->name = $request->input('name');
+    $application->email = $request->input('email');
+    $application->resume = $resumePath;
+    $application->save();
+
+    return redirect('/')->with('message', 'Application submitted successfully.');
+}
+
 }

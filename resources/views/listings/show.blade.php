@@ -36,20 +36,40 @@
                     Contact Employer</a
                 >
 
-                <a
-                    href="{{$listing->website}}"
+                <a href="{{$listing->website}}"
                     target="_blank"
                     class="block bg-black text-white py-2 rounded-xl hover:opacity-80"
                     ><i class="fa-solid fa-globe"></i> Visit
-                    Website</a
-                >
+                    Website</a>
+                    <div class="text-lg space-y-6">
+                        @if($listing->user_id == auth()->id()) 
+                        <a href="{{$listing->website}}"
+                            target="_blank"
+                            class="block bg-black text-white py-2 rounded-xl hover:opacity-80"
+                            ><i class="fa-solid fa-gear"></i> View Listings
+                            </a>
+                        @else
+                        @php
+                            print_r($listing->id);
+                        @endphp
+                        <a href="/listings/{{$listing->id}}/apply"
+                            
+                            class="block bg-black text-white py-2 rounded-xl hover:opacity-80"
+                            ><i class="fa-solid fa-paper-plane"></i> Apply for listing
+                            </a>
+                        @endif
+                    </div>
+
             </div>
+           
         </div>
-    </div>
+
+       
+        </div>
 </x-card>
 
     <x-card class="mt-4 p-2 flex space-x-6">
-
+        
         @if($listing->user_id == auth()->id()) 
             <a href="/listings/{{$listing->id}}/edit">
                 <i class="fa-solid fa-pencil"></i> Edit
