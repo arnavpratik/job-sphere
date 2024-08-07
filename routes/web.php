@@ -60,7 +60,7 @@ Route::get('/listings/{id}/activate', [ListingController::class, 'activate'])->n
 Route::get('/listings/{id}/deactivate', [ListingController::class, 'deactivate'])->name('listings.deactivate');
 
 //Show Apply form
-Route::get('/listings/{id}/apply', [ListingController::class, 'apply']);
+Route::get('/listings/{id}/apply', [ListingController::class, 'apply'])->middleware('auth');
 
 //Store Listing data
-Route::post('/listings/{id}/save', [ListingController::class, 'save']);
+Route::post('/listings/{id}/save', [ListingController::class, 'save'])->middleware('auth');

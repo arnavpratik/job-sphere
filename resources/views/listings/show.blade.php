@@ -42,16 +42,7 @@
                     ><i class="fa-solid fa-globe"></i> Visit
                     Website</a>
                     <div class="text-lg space-y-6">
-                        @if($listing->user_id == auth()->id()) 
-                        <a href="{{$listing->website}}"
-                            target="_blank"
-                            class="block bg-black text-white py-2 rounded-xl hover:opacity-80"
-                            ><i class="fa-solid fa-gear"></i> View Listings
-                            </a>
-                        @else
-                        @php
-                            print_r($listing->id);
-                        @endphp
+                        @if($listing->user_id != auth()->id()) 
                         <a href="/listings/{{$listing->id}}/apply"
                             
                             class="block bg-black text-white py-2 rounded-xl hover:opacity-80"

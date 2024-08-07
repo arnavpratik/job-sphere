@@ -1,23 +1,19 @@
 <?php
 
 namespace App\Http\Controllers;
+
 use App\Models\User;
 use App\Models\Listing;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Models\JobApplication;
-use Illuminate\Validation\Rule; 
+use App\Mail\CandidateApplicationMail;
+use App\Mail\EmployerApplicationMail;
+use Illuminate\Support\Facades\Mail;
 
 class ListingController extends Controller
 {
-    //get and show all listings
-    /* public function index() {
-
-        return view('listings.index' ,[
-            'listings' => Listing::latest()->filter(request(['tag','search']))->paginate(6)
-        ]);
-    } */
-
+    // Get and show all listings
     public function index() {
         return view('listings.index', [
             'listings' => Listing::latest()
@@ -26,26 +22,24 @@ class ListingController extends Controller
                 ->paginate(6)
         ]);
     }
-    
-    // show single listing
+
+    // Show single listing
     public function show(Listing $listing) {
-       // print_r($listing->id);
         return view('listings.show', [
             'listing' => $listing
-    ]);
-
+        ]);
     }
 
-    //show create form
+    // Show create form
     public function create() {
-       return view('listings.create') ;
+        return view('listings.create');
     }
 
-    //store listing data
+    // Store listing data
     public function store(Request $request) {
-        $formFields =    $request->validate([
+        $formFields = $request->validate([
             'title' => 'required',
-            'company'=> 'required',
+            'company' => 'required',
             'location' => 'required',
             'website' => 'required',
             'email' => ['required', 'email'],
@@ -53,7 +47,7 @@ class ListingController extends Controller
             'description' => 'required'
         ]);
 
-        if($request->hasFile('logo')) {
+        if ($request->hasFile('logo')) {
             $formFields['logo'] = $request->file('logo')->store('logos', 'public');
         }
 
@@ -64,21 +58,21 @@ class ListingController extends Controller
         return redirect('/')->with('message', 'Listing created successfully!');
     }
 
-    //Show Edit Form
+    // Show edit form
     public function edit(Listing $listing) {
-        return view('listings.edit' , ['listing' =>$listing]);
+        return view('listings.edit', ['listing' => $listing]);
     }
 
-     //Update listing data
-     public function update(Request $request , Listing $listing) {
+    // Update listing data
+    public function update(Request $request, Listing $listing) {
         // Make sure logged in user is owner
-        if($listing->user_id != auth()->id()) {
+        if ($listing->user_id != auth()->id()) {
             abort(403, 'Unauthorized Action');
         }
 
-        $formFields =    $request->validate([
+        $formFields = $request->validate([
             'title' => 'required',
-            'company'=> 'required',
+            'company' => 'required',
             'location' => 'required',
             'website' => 'required',
             'email' => ['required', 'email'],
@@ -86,7 +80,7 @@ class ListingController extends Controller
             'description' => 'required'
         ]);
 
-        if($request->hasFile('logo')) {
+        if ($request->hasFile('logo')) {
             $formFields['logo'] = $request->file('logo')->store('logos', 'public');
         }
         $listing->update($formFields);
@@ -94,27 +88,25 @@ class ListingController extends Controller
         return back()->with('message', 'Listing updated successfully!');
     }
 
-    //Delete Listing
+    // Delete listing
     public function destroy(Listing $listing) {
-
-         // Make sure logged in user is owner
-         if($listing->user_id != auth()->id()) {
+        // Make sure logged in user is owner
+        if ($listing->user_id != auth()->id()) {
             abort(403, 'Unauthorized Action');
         }
 
         $listing->delete();
 
-        return redirect('/')->with('message' , 'Listing deleted successfully');
+        return redirect('/')->with('message', 'Listing deleted successfully');
     }
 
-    // Manage Listings
+    // Manage listings
     public function manage() {
-        /* return view('listings.manage', ['listings' => auth()->user()->listings()->get()]); */
         return view('listings.manage', ['listings' => auth()->user()->listings]);
     }
 
-    public function activate($id)
-    {
+    // Activate listing
+    public function activate($id) {
         $listing = Listing::find($id);
         $listing->status = true;
         $listing->save();
@@ -122,8 +114,8 @@ class ListingController extends Controller
         return redirect('/')->with('message', 'Listing activated successfully.');
     }
 
-    public function deactivate($id)
-    {
+    // Deactivate listing
+    public function deactivate($id) {
         $listing = Listing::find($id);
         $listing->status = false;
         $listing->save();
@@ -131,35 +123,40 @@ class ListingController extends Controller
         return redirect('/')->with('message', 'Listing deactivated successfully.');
     }
 
-    public function apply(Listing $listing) {
-        //print_r($listing->id);
+    // Show application form
+    public function apply($id) {
         return view('listings.form', [
-            'listing' => $listing
-    ]);
+            'listing' => Listing::findOrFail($id)
+        ]);
     }
 
-    public function save(Request $request, $id)
-{
-    $request->validate([
-        'name' => 'required|string|max:255',
-        'email' => 'required|email|max:255',
-        'resume' => 'required|file|mimes:pdf,doc,docx|max:2048',
-    ]);
+    // Save job application
+    public function save(Request $request, $id) {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|max:255',
+            'mobile' => 'required|digits:10',
+            'resume' => 'required|file|mimes:pdf,doc,docx|max:2048',
+        ]);
 
-    $listing = Listing::findOrFail($id);
+        $listing = Listing::findOrFail($id);
 
-    // Store the uploaded resume
-    $resumePath = $request->file('resume')->store('resumes', 'public');
+        $resumePath = $request->file('resume')->store('resumes', 'public');
 
-    // Create a new job application record
-    $application = new JobApplication();
-    $application->listing_id = $listing->id;
-    $application->name = $request->input('name');
-    $application->email = $request->input('email');
-    $application->resume = $resumePath;
-    $application->save();
+        $application = new JobApplication();
+        $application->listing_id = $listing->id;
+        $application->name = $request->input('name');
+        $application->email = $request->input('email');
+        $application->mobile = $request->input('mobile');
+        $application->resume = $resumePath;
+        $application->save();
 
-    return redirect('/')->with('message', 'Application submitted successfully.');
-}
+        // Send email to the candidate
+    Mail::to($application->email)->send(new CandidateApplicationMail($application, $listing));
 
+    // Send email to the employer
+    Mail::to($listing->user->email)->send(new EmployerApplicationMail($application, $listing, $resumePath));
+
+        return redirect('/')->with('message', 'Application submitted successfully.');
+    }
 }
