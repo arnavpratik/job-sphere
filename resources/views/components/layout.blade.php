@@ -3,8 +3,12 @@
     <head>
         <meta charset="UTF-8" />
         <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="csrf-token" content="{{ csrf_token() }}">
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <link rel="icon" href="images/favicon.ico" />
+        <link rel="icon" href="/images/title.ico" />
+
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<link rel="stylesheet" href="app.css">
         <link
             rel="stylesheet"
             href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css"
@@ -32,7 +36,7 @@
     <body class="mb-48">
         <nav class="flex justify-between items-center mb-4">
             <a href="/"
-                ><img class="w-24" src="{{asset('images/JobSphere.png')}}" alt="" class="logo"
+                ><img class="w-24" src="{{asset('images/JobSph.jpg')}}" alt="" class="logo"
             /></a>
             <ul class="flex space-x-6 mr-6 text-lg">
                 @auth
@@ -44,6 +48,8 @@
       <li>
         <a href="/listings/manage" class="hover:text-laravel"><i class="fa-solid fa-gear"></i> Manage Listings</a>
       </li>
+      <li>
+        <a href="{{ route('applications.index') }}">Job Applications</a></li>
       <li>
         <form class="inline" method="POST" action="/logout">
           @csrf

@@ -26,4 +26,10 @@ class Listing extends Model
     public function user() {
         return $this->belongsTo(User::class, 'user_id');
     }
+
+    // Relationship with the JobApplication model
+    public function jobApplications()
+    {
+        return $this->hasMany(JobApplication::class);
+    }
 }

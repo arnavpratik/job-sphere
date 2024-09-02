@@ -4,6 +4,7 @@ use App\Models\Listing;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ListingController;
+use App\Http\Controllers\JobApplicationController;
 
 // Common Resource Routes:
 // index - Show all listings
@@ -13,6 +14,9 @@ use App\Http\Controllers\ListingController;
 // edit - Show form to edit listing
 // update - Update listing
 // destroy - Delete listing 
+
+Route::get('/applications', [JobApplicationController::class, 'index'])->name('applications.index');
+Route::post('/applications/{id}/withdraw', [JobApplicationController::class, 'withdraw'])->name('applications.withdraw');
 
 // All listing 
 Route::get('/', [ListingController::class, 'index']);
@@ -64,3 +68,9 @@ Route::get('/listings/{id}/apply', [ListingController::class, 'apply'])->middlew
 
 //Store Listing data
 Route::post('/listings/{id}/save', [ListingController::class, 'save'])->middleware('auth');
+
+
+
+Route::get('/test', function () {
+    return 'Route is working';
+});
